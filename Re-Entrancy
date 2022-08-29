@@ -46,5 +46,16 @@ contract AttackingContract {
     }
 }
 
+//Prevention:- using OpenZeppelin has a ReentrancyGuard library 
+//that provides a modifier named nonReentrant which blocks re-entrancy in functions you apply it to. 
+//It basically works like the following:
+
+modifier nonReentrant() {
+    require(!locked, "No re-entrancy");
+    locked = true;
+    _;
+    locked = false;
+}
+
 
 //Code credit :- LearnWeb3 DAO
