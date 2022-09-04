@@ -9,7 +9,7 @@ contract FindHash {
 
     constructor() payable {}
 
-    function match(string memory solution) public {
+    function matching(string memory solution) public {
     
         //generating hash by entered string and matching with hardcoded hash
         require(hash == keccak256(abi.encodePacked(solution)), "Incorrect Match");
