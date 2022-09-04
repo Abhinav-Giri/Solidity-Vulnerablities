@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.15;
+
+contract FindHash {
+
+    //hardcoded address that needs to be matched
+    bytes32 public constant hash =
+        0x456ccaf7594d66b1eaaea24fe01f0585bf52ee70852af4eac0cc4b04753dc0e2;
+
+    constructor() payable {}
+
+    function match(string memory solution) public {
+    
+        //generating hash by entered string and matching with hardcoded hash
+        require(hash == keccak256(abi.encodePacked(solution)), "Incorrect Match");
+
+        (bool sent, ) = msg.sender.call{value: 20 ether}("");
+        require(sent, "Failed to send");
+    }
+}
+
+
+/* What happened?
+Transactions take some time before they are mined.
+Transactions not yet mined are put in the transaction pool.
+Transactions with higher gas price are typically mined first.
+An attacker can get the answer from the transaction pool, send a transaction
+with a higher gas price so that their transaction will be included in a block
+before the original.
+*/
