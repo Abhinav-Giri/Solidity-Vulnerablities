@@ -6,7 +6,7 @@ contract DelayedWithdraw {
 
     function deposit() external payable {
         amount[msg.sender] += msg.value;
-        lockTime[msg.sender] = block.timestamp + 1 weeks;
+        lockTime[msg.sender] = block.timestamp + 2 weeks;
     }
 
     function lockTimeIncrease(uint _secondsToIncrease) public {
