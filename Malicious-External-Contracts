@@ -1,0 +1,49 @@
+/SPDX-License-Identifier: MIT
+pragma solidity ^0.8.15;
+
+//Actula contractc is contract Alice
+contract Alice {
+ Bar bar;
+ constructor(address _bar){
+     bar = Bar(_bar);
+ }
+ function isQualified() public view returns(bool) {
+     return bar.isUserQualified(msg.sender) ;
+
+ }
+ function addtoList() public{
+     bar.setUserQualified(msg.sender);
+ }
+ fallback() external{}
+}
+ //contract on which contract Alice is dependent
+contract Bar{
+    mapping(address=> bool) userQualified;
+
+    function isUserQualified(address user) public view returns (bool) {
+        return userQualified[user];
+    }
+    function setUserQualified(address user) public{
+        userQualified[user] = true;
+    }
+    fallback() external{}
+}
+
+// This code is hidden in a separate file
+contract Attack {
+    address owner;
+    constructor() {
+        owner = msg.sender ;
+    }
+    mapping(address => bool) userQualified;
+    function isUserQualified(address user) public view returns(bool) {
+        if (user == owner) {
+            return true;
+        }
+        return false;
+    }
+    function setUserQualified(address user) public {
+        userQualified[user] =true;
+    }
+    fallback() external{}
+}
