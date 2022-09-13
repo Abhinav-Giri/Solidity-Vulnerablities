@@ -1,7 +1,7 @@
 /SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-//Actula contractc is contract Alice
+//Actual contract is contract Alice
 contract Alice {
  Bar bar;
  constructor(address _bar) payable{
