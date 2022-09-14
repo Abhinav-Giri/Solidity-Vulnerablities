@@ -34,4 +34,6 @@ contract Attack{
     }
 }
 
+// Use msg.sender in place of origin.tx
+
 
